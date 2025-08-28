@@ -23,7 +23,6 @@
         }
         .control-panel {
             background-color: #ffffff;
-            border-left: 1px solid #e2e8f0;
         }
         
         /* Custom styled radio buttons for tool selection */
@@ -99,159 +98,179 @@
 </head>
 <body class="text-gray-800 flex flex-col md:flex-row h-screen overflow-hidden">
 
+    <!-- Mobile Menu Button -->
+    <button id="menu-open-button" class="md:hidden fixed top-4 left-4 z-20 p-2 bg-white rounded-full shadow-lg btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+
     <!-- Main Canvas Area -->
-    <main class="flex-1 flex items-center justify-center p-4 md:p-8 order-1 md:order-none">
+    <main class="flex-1 flex items-center justify-center p-4 md:p-8">
         <div id="p5-canvas-container" class="w-full h-full rounded-lg overflow-hidden">
             <!-- p5.js canvas will be inserted here -->
         </div>
     </main>
 
     <!-- Controls Panel -->
-    <div class="control-panel w-full md:w-80 lg:w-96 p-6 space-y-6 overflow-y-auto order-2 md:order-none">
-        <div class="flex justify-between items-center">
-            <div class="space-y-1">
-                <h1 class="text-2xl font-bold text-gray-900">Marbler</h1>
-                <p class="text-sm text-gray-500">Create unique, fluid art by dropping and combing digital ink.</p>
-            </div>
-            <button id="about-button" class="btn p-2 rounded-full hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            </button>
-        </div>
-
-        <!-- Actions -->
-        <div class="grid grid-cols-2 gap-2 pt-2">
-            <button id="save-png" class="btn w-full bg-white text-gray-700 font-semibold py-2 px-4 rounded-lg">Save PNG</button>
-            <button id="clear-canvas" class="btn w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg">
-                Clear Canvas
-            </button>
-        </div>
-
-        <!-- Mode Section -->
-        <div class="space-y-3 pt-4 border-t border-gray-200">
-            <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Mode</h2>
-            <div class="grid grid-cols-2 gap-2 tool-selector w-full">
-                <input type="radio" name="mode" value="paint" id="mode-paint" checked>
-                <label for="mode-paint" title="Paint" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
-                    <span>Paint</span>
-                </label>
-                <input type="radio" name="mode" value="navigate" id="mode-navigate">
-                <label for="mode-navigate" title="Navigate" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
-                    <span>Navigate</span>
-                </label>
-            </div>
-        </div>
-        
-        <div id="paint-controls">
-            <!-- Tools Section -->
-            <div class="space-y-3 pt-4 border-t border-gray-200">
-                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Tool</h2>
-                <div class="grid grid-cols-3 gap-2 tool-selector w-full">
-                    <input type="radio" name="tool" value="ink" id="tool-ink" checked>
-                    <label for="tool-ink" title="Ink Drop" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
-                        <span>Ink</span>
-                    </label>
-                    
-                    <input type="radio" name="tool" value="tine-line" id="tool-tine-line">
-                    <label for="tool-tine-line" title="Tine Line" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
-                        <span>Line</span>
-                    </label>
-                    
-                    <input type="radio" name="tool" value="tine-circle" id="tool-tine-circle">
-                    <label for="tool-tine-circle" title="Tine Circle" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
-                        <span>Circle</span>
-                    </label>
+    <div id="control-panel" class="control-panel fixed inset-y-0 left-0 z-40 w-full max-w-sm transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:max-w-none md:w-80 lg:w-96 md:translate-x-0 md:border-l md:border-gray-200 p-6 flex flex-col">
+        <div class="space-y-6 overflow-y-auto">
+            <div class="flex justify-between items-center">
+                <div class="space-y-1">
+                    <h1 class="text-2xl font-bold text-gray-900">Marbler</h1>
+                    <p class="text-sm text-gray-500">Create unique, fluid art.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                     <button id="about-button" class="btn p-2 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    </button>
+                    <button id="menu-close-button" class="md:hidden btn p-2 rounded-full hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
                 </div>
             </div>
 
-            <!-- Settings Sections -->
-            <div id="ink-settings-panel" class="space-y-4 pt-4 border-t border-gray-200">
-                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Ink Dropper</h2>
-                <div class="space-y-4">
-                    <div class="space-y-1">
-                        <label for="drop-growth-rate" class="text-xs font-medium flex justify-between items-center">
-                            <span>Growth Rate</span> 
-                            <input type="number" id="drop-growth-rate-value" class="w-16 text-center rounded-md p-1" min="10" max="150" value="50" step="1">
+            <!-- Mode Section -->
+            <div class="space-y-3 pt-4 border-t border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Mode</h2>
+                <div class="grid grid-cols-2 gap-2 tool-selector w-full">
+                    <input type="radio" name="mode" value="paint" id="mode-paint" checked>
+                    <label for="mode-paint" title="Paint" class="flex items-center justify-center gap-2 p-3 rounded-md font-medium text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+                        <span>Paint</span>
+                    </label>
+                    <input type="radio" name="mode" value="navigate" id="mode-navigate">
+                    <label for="mode-navigate" title="Navigate" class="flex items-center justify-center gap-2 p-3 rounded-md font-medium text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg>
+                        <span>Navigate</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div id="paint-controls" class="space-y-6">
+                <!-- Tools Section -->
+                <div class="space-y-3 pt-4 border-t border-gray-200">
+                    <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Tool</h2>
+                    <div class="grid grid-cols-3 gap-2 tool-selector w-full">
+                        <input type="radio" name="tool" value="ink" id="tool-ink" checked>
+                        <label for="tool-ink" title="Ink Drop" class="flex items-center justify-center gap-2 p-3 rounded-md font-medium text-sm">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                            <span>Ink</span>
                         </label>
-                        <input type="range" id="drop-growth-rate" min="10" max="150" value="50" step="1">
-                    </div>
-                    <div class="space-y-1">
-                        <label for="drop-detail" class="text-xs font-medium flex justify-between items-center">
-                            <span>Detail</span> 
-                            <input type="number" id="drop-detail-value" class="w-16 text-center rounded-md p-1" min="10" max="10000" value="2000">
+                        
+                        <input type="radio" name="tool" value="tine-line" id="tool-tine-line">
+                        <label for="tool-tine-line" title="Tine Line" class="flex items-center justify-center gap-2 p-3 rounded-md font-medium text-sm">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <span>Line</span>
                         </label>
-                        <input type="range" id="drop-detail" min="10" max="10000" value="2000">
-                    </div>
-                     <div class="space-y-1">
-                        <label for="ink-displacement" class="text-xs font-medium flex justify-between items-center">
-                            <span>Displacement</span> 
-                            <input type="number" id="ink-displacement-value" class="w-16 text-center rounded-md p-1" min="0.1" max="2" value="1" step="0.1">
+                        
+                        <input type="radio" name="tool" value="tine-circle" id="tool-tine-circle">
+                        <label for="tool-tine-circle" title="Tine Circle" class="flex items-center justify-center gap-2 p-3 rounded-md font-medium text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+                            <span>Circle</span>
                         </label>
-                        <input type="range" id="ink-displacement" min="0.1" max="2" value="1" step="0.1">
                     </div>
-                    <div class="space-y-1">
-                        <label for="ink-trail-spacing" class="text-xs font-medium flex justify-between items-center">
-                            <span>Trail Spacing</span> 
-                            <input type="number" id="ink-trail-spacing-value" class="w-16 text-center rounded-md p-1" min="5" max="100" value="25" step="1">
-                        </label>
-                        <input type="range" id="ink-trail-spacing" min="5" max="100" value="25" step="1">
-                    </div>
-                    <div class="space-y-2">
-                         <label class="text-xs font-medium">Color</label>
-                        <div class="flex items-center gap-3">
-                            <input type="color" id="color-picker" value="#4f46e5" class="w-9 h-9 p-0 border-none bg-transparent rounded-md cursor-pointer appearance-none">
-                            <div class="flex-grow">
-                                <label class="flex items-center gap-2 text-sm">
-                                    <input type="checkbox" id="random-color" class="accent-indigo-600 w-4 h-4 rounded" checked>
-                                    <span>Random</span>
-                                </label>
-                                <select id="color-palette" class="w-full text-xs p-1 rounded-md mt-1 bg-white"></select>
-                                <div id="color-palette-preview" class="flex items-center mt-2 h-4 overflow-hidden w-full space-x-1"></div>
+                </div>
+
+                <!-- Settings Sections -->
+                <div id="ink-settings-panel" class="space-y-4 pt-4 border-t border-gray-200">
+                    <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Ink Dropper</h2>
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label for="drop-growth-rate" class="text-xs font-medium flex justify-between items-center">
+                                <span>Growth Rate</span> 
+                                <input type="number" id="drop-growth-rate-value" class="w-16 text-center rounded-md p-1" min="10" max="150" value="50" step="1">
+                            </label>
+                            <input type="range" id="drop-growth-rate" min="10" max="150" value="50" step="1">
+                        </div>
+                        <div class="space-y-1">
+                            <label for="drop-detail" class="text-xs font-medium flex justify-between items-center">
+                                <span>Detail</span> 
+                                <input type="number" id="drop-detail-value" class="w-16 text-center rounded-md p-1" min="10" max="10000" value="2000">
+                            </label>
+                            <input type="range" id="drop-detail" min="10" max="10000" value="2000">
+                        </div>
+                         <div class="space-y-1">
+                            <label for="ink-displacement" class="text-xs font-medium flex justify-between items-center">
+                                <span>Displacement</span> 
+                                <input type="number" id="ink-displacement-value" class="w-16 text-center rounded-md p-1" min="0.1" max="2" value="1" step="0.1">
+                            </label>
+                            <input type="range" id="ink-displacement" min="0.1" max="2" value="1" step="0.1">
+                        </div>
+                        <div class="space-y-1">
+                            <label for="ink-trail-spacing" class="text-xs font-medium flex justify-between items-center">
+                                <span>Trail Spacing</span> 
+                                <input type="number" id="ink-trail-spacing-value" class="w-16 text-center rounded-md p-1" min="5" max="100" value="25" step="1">
+                            </label>
+                            <input type="range" id="ink-trail-spacing" min="5" max="100" value="25" step="1">
+                        </div>
+                        <div class="space-y-2">
+                             <label class="text-xs font-medium">Color</label>
+                            <div class="flex items-center gap-3">
+                                <input type="color" id="color-picker" value="#4f46e5" class="w-9 h-9 p-0 border-none bg-transparent rounded-md cursor-pointer appearance-none">
+                                <div class="flex-grow">
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="checkbox" id="random-color" class="accent-indigo-600 w-4 h-4 rounded" checked>
+                                        <span>Random</span>
+                                    </label>
+                                    <select id="color-palette" class="w-full text-xs p-1 rounded-md mt-1 bg-white"></select>
+                                    <div id="color-palette-preview" class="flex items-center mt-2 h-4 overflow-hidden w-full space-x-1"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="tine-settings-panel" class="hidden space-y-4 pt-4 border-t border-gray-200">
-                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Tine Tools</h2>
-                <div class="space-y-4">
-                    <div class="space-y-1">
-                        <label for="tine-z" class="text-xs font-medium flex justify-between items-center">
-                            <span id="tine-z-label">Displacement Rate</span> 
-                            <input type="number" id="tine-z-value" class="w-16 text-center rounded-md p-1" min="0" max="100" value="80" step="0.1">
-                        </label>
-                        <input type="range" id="tine-z" min="0" max="100" value="80" step="0.1">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-xs font-medium">Direction</label>
-                        <div id="tine-line-direction" class="grid grid-cols-2 gap-2 tool-selector w-full">
-                            <input type="radio" name="tine-line-direction" value="1" id="tine-line-forward" checked>
-                            <label for="tine-line-forward" class="text-center p-2 rounded-md text-sm">Forward</label>
-                            <input type="radio" name="tine-line-direction" value="-1" id="tine-line-backward">
-                            <label for="tine-line-backward" class="text-center p-2 rounded-md text-sm">Backward</label>
+                <div id="tine-settings-panel" class="hidden space-y-4 pt-4 border-t border-gray-200">
+                    <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Tine Tools</h2>
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label for="tine-z" class="text-xs font-medium flex justify-between items-center">
+                                <span id="tine-z-label">Displacement Rate</span> 
+                                <input type="number" id="tine-z-value" class="w-16 text-center rounded-md p-1" min="0" max="100" value="80" step="0.1">
+                            </label>
+                            <input type="range" id="tine-z" min="0" max="100" value="80" step="0.1">
                         </div>
-                        <div id="tine-circle-direction" class="hidden grid grid-cols-2 gap-2 tool-selector w-full">
-                            <input type="radio" name="tine-circle-direction" value="1" id="tine-circle-cw" checked>
-                            <label for="tine-circle-cw" class="text-center p-2 rounded-md text-sm">Clockwise</label>
-                            <input type="radio" name="tine-circle-direction" value="-1" id="tine-circle-ccw">
-                            <label for="tine-circle-ccw" class="text-center p-2 rounded-md text-sm">Counter-CW</label>
+                        <div class="space-y-2">
+                            <label class="text-xs font-medium">Direction</label>
+                            <div id="tine-line-direction" class="grid grid-cols-2 gap-2 tool-selector w-full">
+                                <input type="radio" name="tine-line-direction" value="1" id="tine-line-forward" checked>
+                                <label for="tine-line-forward" class="text-center p-2 rounded-md text-sm">Forward</label>
+                                <input type="radio" name="tine-line-direction" value="-1" id="tine-line-backward">
+                                <label for="tine-line-backward" class="text-center p-2 rounded-md text-sm">Backward</label>
+                            </div>
+                            <div id="tine-circle-direction" class="hidden grid grid-cols-2 gap-2 tool-selector w-full">
+                                <input type="radio" name="tine-circle-direction" value="1" id="tine-circle-cw" checked>
+                                <label for="tine-circle-cw" class="text-center p-2 rounded-md text-sm">Clockwise</label>
+                                <input type="radio" name="tine-circle-direction" value="-1" id="tine-circle-ccw">
+                                <label for="tine-circle-ccw" class="text-center p-2 rounded-md text-sm">Counter-CW</label>
+                            </div>
                         </div>
-                    </div>
-                    <div class="space-y-1">
-                        <label for="tine-c" class="text-xs font-medium flex justify-between items-center">
-                            <span>Sharpness</span> 
-                            <input type="number" id="tine-c-value" class="w-16 text-center rounded-md p-1" min="1" max="50" value="40" step="0.1">
-                        </label>
-                        <input type="range" id="tine-c" min="1" max="50" value="40" step="0.1">
-                    </div>
-                    <div id="tine-circle-radius-container" class="hidden space-y-1">
-                        <label for="tine-circle-radius" class="text-xs font-medium flex justify-between items-center">
-                            <span>Circle Radius</span> 
-                            <input type="number" id="tine-circle-radius-value" class="w-16 text-center rounded-md p-1" min="10" max="300" value="80" step="0.1">
-                        </label>
-                        <input type="range" id="tine-circle-radius" min="10" max="300" value="80" step="0.1">
+                        <div class="space-y-1">
+                            <label for="tine-c" class="text-xs font-medium flex justify-between items-center">
+                                <span>Sharpness</span> 
+                                <input type="number" id="tine-c-value" class="w-16 text-center rounded-md p-1" min="1" max="50" value="40" step="0.1">
+                            </label>
+                            <input type="range" id="tine-c" min="1" max="50" value="40" step="0.1">
+                        </div>
+                        <div id="tine-circle-radius-container" class="hidden space-y-1">
+                            <label for="tine-circle-radius" class="text-xs font-medium flex justify-between items-center">
+                                <span>Circle Radius</span> 
+                                <input type="number" id="tine-circle-radius-value" class="w-16 text-center rounded-md p-1" min="10" max="300" value="80" step="0.1">
+                            </label>
+                            <input type="range" id="tine-circle-radius" min="10" max="300" value="80" step="0.1">
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="mt-auto pt-6 border-t border-gray-200 space-y-2">
+             <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Actions</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <button id="save-png" class="btn w-full bg-white text-gray-700 font-semibold py-2 px-4 rounded-lg">Save PNG</button>
+                <button id="clear-canvas" class="btn w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg">
+                    Clear Canvas
+                </button>
             </div>
         </div>
     </div>
@@ -379,6 +398,29 @@
                 canvas.parent(container);
                 camera.x = p.width / 2;
                 camera.y = p.height / 2;
+
+                // --- Mobile Menu Logic ---
+                const controlPanel = document.getElementById('control-panel');
+                const openMenuButton = document.getElementById('menu-open-button');
+                const closeMenuButton = document.getElementById('menu-close-button');
+                const backdrop = document.createElement('div');
+                backdrop.className = 'fixed inset-0 bg-black/30 z-30 md:hidden hidden';
+                document.body.appendChild(backdrop);
+
+                const openMenu = () => {
+                    controlPanel.classList.remove('-translate-x-full');
+                    backdrop.classList.remove('hidden');
+                };
+
+                const closeMenu = () => {
+                    controlPanel.classList.add('-translate-x-full');
+                    backdrop.classList.add('hidden');
+                };
+
+                openMenuButton.addEventListener('click', openMenu);
+                closeMenuButton.addEventListener('click', closeMenu);
+                backdrop.addEventListener('click', closeMenu);
+
 
                 const tineZSlider = document.getElementById('tine-z');
                 const tineZValue = document.getElementById('tine-z-value');
@@ -547,21 +589,21 @@
                 const aboutModal = document.getElementById('about-modal');
                 const aboutButton = document.getElementById('about-button');
                 const closeModalButton = document.getElementById('close-modal-button');
-                const modalBackdrop = document.querySelector('.modal-backdrop');
+                const aboutModalBackdrop = aboutModal.querySelector('.modal-backdrop');
 
-                const openModal = () => {
+                const openAboutModal = () => {
                     isModalOpen = true;
                     aboutModal.classList.remove('hidden');
                 };
-                const closeModal = (e) => {
+                const closeAboutModal = (e) => {
                     e.stopPropagation();
                     aboutModal.classList.add('hidden');
                     isModalOpen = false;
                 };
 
-                aboutButton.addEventListener('click', openModal);
-                closeModalButton.addEventListener('click', closeModal);
-                modalBackdrop.addEventListener('click', closeModal);
+                aboutButton.addEventListener('click', openAboutModal);
+                closeModalButton.addEventListener('click', closeAboutModal);
+                aboutModalBackdrop.addEventListener('click', closeAboutModal);
 
                 // Tutorial Modal Logic
                 const tutorialModal = document.getElementById('tutorial-modal');
@@ -585,6 +627,7 @@
                     openTutorial();
                 }
                 closeTutorialButton.addEventListener('click', closeTutorial);
+                tutorialModal.querySelector('.modal-backdrop').addEventListener('click', closeTutorial);
 
 
                 setTimeout(fitCanvasToContainer, 100);
