@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marbled Ink Studio</title>
+    <!-- Tailwind CSS for styling the UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- p5.js library for graphics and interaction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <!-- p5.js SVG library for saving vector graphics -->
+    <script src="https://cdn.jsdelivr.net/npm/p5.js-svg@1.5.1/dist/p5.svg.min.js"></script>
+    <style>
+        /* Custom styles for a clean, artistic gallery feel */
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none; /* Prevents pull-to-refresh on mobile */
+            background: #f8fafc; /* A very light, clean gray */
+        }
+        #p5-canvas-container {
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+        .control-panel {
+            background-color: #ffffff;
+            border-left: 1px solid #e2e8f0;
+        }
+        
+        /* Custom styled radio buttons for tool selection */
+        .tool-selector input[type="radio"] { display: none; }
+        .tool-selector label {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            border: 2px solid #e2e8f0;
+        }
+        .tool-selector input[type="radio"]:checked + label {
+            background-color: #e0e7ff;
+            border-color: #a5b4fc;
+            color: #312e81;
+        }
+        .tool-selector label:hover {
+            background-color: #f8fafc;
+            border-color: #c7d2fe;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 5px;
+            background: #e2e8f0;
+            border-radius: 99px; outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 18px; height: 18px;
+            background: #4f46e5;
+            cursor: pointer; border-radius: 50%;
+            transition: background 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { background: #6366f1; }
+        
+        select, .btn, input[type="number"] {
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s ease-in-out;
+        }
+        select:hover, .btn:hover, input[type="number"]:hover {
+            border-color: #a5b4fc;
+            box-shadow: 0 0 0 2px #e0e7ff;
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+          -webkit-appearance: none; 
+          margin: 0; 
+        }
+        input[type=number] {
+          -moz-appearance: textfield;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="text-gray-800 flex flex-col md:flex-row h-screen overflow-hidden">
+
+    <!-- Main Canvas Area -->
+    <main class="flex-1 flex items-center justify-center p-4 md:p-8 order-1 md:order-none">
+        <div id="p5-canvas-container" class="w-full h-full rounded-lg overflow-hidden">
+            <!-- p5.js canvas will be inserted here -->
+        </div>
+    </main>
+
+    <!-- Controls Panel -->
+    <div class="control-panel w-full md:w-80 lg:w-96 p-6 space-y-6 overflow-y-auto order-2 md:order-none">
+        <div class="space-y-1">
+            <h1 class="text-2xl font-bold text-gray-900">Marbled Ink Studio</h1>
+            <p class="text-sm text-gray-500">A digital marbling canvas.</p>
+        </div>
+
+        <!-- Mode Section -->
+        <div class="space-y-3 pt-4">
+            <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Mode</h2>
+            <div class="grid grid-cols-2 gap-2 tool-selector w-full">
+                <input type="radio" name="mode" value="paint" id="mode-paint" checked>
+                <label for="mode-paint" title="Paint" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
+                    <span>Paint</span>
+                </label>
+                <input type="radio" name="mode" value="navigate" id="mode-navigate">
+                <label for="mode-navigate" title="Navigate" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
+                    <span>Navigate</span>
+                </label>
+            </div>
+        </div>
+        
+        <div id="paint-controls">
+            <!-- Tools Section -->
+            <div class="space-y-3 pt-4 border-t border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Tool</h2>
+                <div class="grid grid-cols-3 gap-2 tool-selector w-full">
+                    <input type="radio" name="tool" value="ink" id="tool-ink" checked>
+                    <label for="tool-ink" title="Ink Drop" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
+                        <span>Ink</span>
+                    </label>
+                    
+                    <input type="radio" name="tool" value="tine-line" id="tool-tine-line">
+                    <label for="tool-tine-line" title="Tine Line" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
+                        <span>Line</span>
+                    </label>
+                    
+                    <input type="radio" name="tool" value="tine-circle" id="tool-tine-circle">
+                    <label for="tool-tine-circle" title="Tine Circle" class="flex items-center justify-center p-3 rounded-md font-medium text-sm">
+                        <span>Circle</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Settings Sections -->
+            <div id="ink-settings-panel" class="space-y-4 pt-4 border-t border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Ink Dropper</h2>
+                <div class="space-y-4">
+                    <div class="space-y-1">
+                        <label for="drop-radius" class="text-xs font-medium flex justify-between items-center">
+                            <span>Radius</span> 
+                            <input type="number" id="drop-radius-value" class="w-16 text-center rounded-md p-1" min="10" max="150" value="50" step="0.1">
+                        </label>
+                        <input type="range" id="drop-radius" min="10" max="150" value="50" step="0.1">
+                    </div>
+                    <div class="space-y-1">
+                        <label for="drop-detail" class="text-xs font-medium flex justify-between items-center">
+                            <span>Detail</span> 
+                            <input type="number" id="drop-detail-value" class="w-16 text-center rounded-md p-1" min="10" max="10000" value="2000">
+                        </label>
+                        <input type="range" id="drop-detail" min="10" max="10000" value="2000">
+                    </div>
+                     <div class="space-y-1">
+                        <label for="ink-displacement" class="text-xs font-medium flex justify-between items-center">
+                            <span>Displacement</span> 
+                            <input type="number" id="ink-displacement-value" class="w-16 text-center rounded-md p-1" min="0.1" max="2" value="1" step="0.1">
+                        </label>
+                        <input type="range" id="ink-displacement" min="0.1" max="2" value="1" step="0.1">
+                    </div>
+                    <div class="space-y-2">
+                         <label class="text-xs font-medium">Color</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" id="color-picker" value="#4f46e5" class="w-9 h-9 p-0 border-none bg-transparent rounded-md cursor-pointer appearance-none">
+                            <div class="flex-grow">
+                                <label class="flex items-center gap-2 text-sm">
+                                    <input type="checkbox" id="random-color" class="accent-indigo-600 w-4 h-4 rounded" checked>
+                                    <span>Random</span>
+                                </label>
+                                <select id="color-palette" class="w-full text-xs p-1 rounded-md mt-1 bg-white">
+                                    <option value="ocean">Ocean Blues</option>
+                                    <option value="sunset">Sunset Hues</option>
+                                    <option value="forest">Forest Greens</option>
+                                    <option value="vibrant">Vibrant</option>
+                                    <option value="random">Purely Random</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tine-settings-panel" class="hidden space-y-4 pt-4 border-t border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Tine Tools</h2>
+                <div class="space-y-4">
+                    <div class="space-y-1">
+                        <label for="tine-z" class="text-xs font-medium flex justify-between items-center">
+                            <span>Displacement <span id="tine-direction-label" class="text-indigo-500 font-bold"></span></span> 
+                            <input type="number" id="tine-z-value" class="w-16 text-center rounded-md p-1" min="-100" max="100" value="80" step="0.1">
+                        </label>
+                        <input type="range" id="tine-z" min="-100" max="100" value="80" step="0.1">
+                    </div>
+                    <div class="space-y-1">
+                        <label for="tine-c" class="text-xs font-medium flex justify-between items-center">
+                            <span>Sharpness</span> 
+                            <input type="number" id="tine-c-value" class="w-16 text-center rounded-md p-1" min="1" max="50" value="40" step="0.1">
+                        </label>
+                        <input type="range" id="tine-c" min="1" max="50" value="40" step="0.1">
+                    </div>
+                    <div id="tine-circle-radius-container" class="hidden space-y-1">
+                        <label for="tine-circle-radius" class="text-xs font-medium flex justify-between items-center">
+                            <span>Circle Radius</span> 
+                            <input type="number" id="tine-circle-radius-value" class="w-16 text-center rounded-md p-1" min="10" max="300" value="80" step="0.1">
+                        </label>
+                        <input type="range" id="tine-circle-radius" min="10" max="300" value="80" step="0.1">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="pt-4 space-y-2 border-t border-gray-200">
+             <h2 class="text-sm font-semibold text-gray-600 uppercase tracking-wider">Actions</h2>
+            <div class="grid grid-cols-2 gap-2">
+                 <button id="save-png" class="btn w-full bg-white text-gray-700 font-semibold py-2 px-4 rounded-lg">Save PNG</button>
+                 <button id="save-svg" class="btn w-full bg-white text-gray-700 font-semibold py-2 px-4 rounded-lg">Save SVG</button>
+            </div>
+            <button id="clear-canvas" class="btn w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg">
+                Clear Canvas
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- p5.js Sketch ---
+        const sketch = (p) => {
+            let polygons = [];
+            
+            // --- Camera Controls ---
+            let camera = { zoom: 1.0, x: 0, y: 0 };
+            let panStart = null;
+
+            // --- UI Control Variables ---
+            let currentMode = 'paint';
+            let currentTool = 'ink';
+            let dropRadius = 50, dropDetail = 2000, inkDisplacement = 1;
+            let tineLineSettings = { z: 80, c: 40 };
+            let tineCircleSettings = { z: 80, c: 40, r: 80 };
+            let inkColor = '#4f46e5';
+            let useRandomColor = true;
+            let dragStart = null;
+            let lastRandomColor = null;
+
+            const colorPalettes = {
+                ocean: ['#03045e', '#023e8a', '#0077b6', '#0096c7', '#00b4d8', '#48cae4', '#90e0ef', '#ade8f4', '#caf0f8', '#7400b8', '#6930c3', '#5e60ce', '#5390d9', '#4ea8de'],
+                sunset: ['#4c1d95', '#7c3aed', '#c084fc', '#f87171', '#fb923c', '#fbbf24', '#fde047', '#ff006e', '#ff6d00', '#ff8500', '#ff9100', '#ffc300'],
+                forest: ['#081c15', '#1b4332', '#2d6a4f', '#40916c', '#52b788', '#74c69d', '#95d5b2', '#283618', '#606c38', '#dda15e', '#bc6c25', '#fefae0'],
+                vibrant: ['#ff6b6b', '#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590', '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c']
+            };
+            let currentPalette = 'ocean';
+
+            class MarblePolygon {
+                constructor(vertices, color) { this.vertices = vertices; this.color = color; }
+                show(g) { // Accepts a graphics context
+                    g.fill(this.color); g.noStroke(); g.beginShape();
+                    for (const v of this.vertices) { g.vertex(v.x, v.y); }
+                    g.endShape(p.CLOSE);
+                }
+            }
+            
+            const drawPolygons = (g) => {
+                g.background('#ffffff');
+                for (const poly of polygons) {
+                    poly.show(g);
+                }
+            };
+
+            const fitCanvasToContainer = () => {
+                const container = document.getElementById('p5-canvas-container');
+                p.resizeCanvas(container.offsetWidth, container.offsetHeight);
+            };
+
+            const screenToWorld = (screenX, screenY) => {
+                return p.createVector(
+                    (screenX - camera.x) / camera.zoom,
+                    (screenY - camera.y) / camera.zoom
+                );
+            };
+
+            p.setup = () => {
+                const container = document.getElementById('p5-canvas-container');
+                const canvas = p.createCanvas(container.offsetWidth, container.offsetHeight);
+                canvas.parent(container);
+                camera.x = p.width / 2;
+                camera.y = p.height / 2;
+
+                const tineZSlider = document.getElementById('tine-z');
+                const tineZValue = document.getElementById('tine-z-value');
+                const tineCSlider = document.getElementById('tine-c');
+                const tineCValue = document.getElementById('tine-c-value');
+                const tineCircleRadiusSlider = document.getElementById('tine-circle-radius');
+                const tineCircleRadiusValue = document.getElementById('tine-circle-radius-value');
+                const tineDirectionLabel = document.getElementById('tine-direction-label');
+
+                const setupSliderBinding = (sliderId, inputId, callback) => {
+                    const slider = document.getElementById(sliderId);
+                    const input = document.getElementById(inputId);
+                    
+                    slider.addEventListener('input', (e) => {
+                        const val = e.target.value;
+                        input.value = val;
+                        callback(val);
+                    });
+                    input.addEventListener('input', (e) => {
+                        const val = e.target.value;
+                        slider.value = val;
+                        callback(val);
+                    });
+                };
+
+                setupSliderBinding('drop-radius', 'drop-radius-value', val => dropRadius = parseFloat(val));
+                setupSliderBinding('drop-detail', 'drop-detail-value', val => dropDetail = parseInt(val, 10));
+                setupSliderBinding('ink-displacement', 'ink-displacement-value', val => inkDisplacement = parseFloat(val));
+                
+                const updateTineDirectionLabel = (val) => {
+                    if (currentTool === 'tine-line') {
+                        tineDirectionLabel.textContent = val >= 0 ? 'Forward' : 'Backward';
+                    } else if (currentTool === 'tine-circle') {
+                        tineDirectionLabel.textContent = val >= 0 ? 'Clockwise' : 'Counter-CW';
+                    }
+                };
+                
+                tineZSlider.addEventListener('input', e => {
+                    const val = parseFloat(e.target.value);
+                    if (currentTool === 'tine-line') tineLineSettings.z = val;
+                    else if (currentTool === 'tine-circle') tineCircleSettings.z = val;
+                    tineZValue.value = val;
+                    updateTineDirectionLabel(val);
+                });
+                tineZValue.addEventListener('input', e => {
+                    const val = parseFloat(e.target.value);
+                    if (currentTool === 'tine-line') tineLineSettings.z = val;
+                    else if (currentTool === 'tine-circle') tineCircleSettings.z = val;
+                    tineZSlider.value = val;
+                    updateTineDirectionLabel(val);
+                });
+
+                tineCSlider.addEventListener('input', e => {
+                    const val = parseFloat(e.target.value);
+                    if (currentTool === 'tine-line') tineLineSettings.c = val;
+                    else if (currentTool === 'tine-circle') tineCircleSettings.c = val;
+                    tineCValue.value = val;
+                });
+                tineCValue.addEventListener('input', e => {
+                    const val = parseFloat(e.target.value);
+                    if (currentTool === 'tine-line') tineLineSettings.c = val;
+                    else if (currentTool === 'tine-circle') tineCircleSettings.c = val;
+                    tineCSlider.value = val;
+                });
+
+                tineCircleRadiusSlider.addEventListener('input', e => {
+                    const val = parseFloat(e.target.value);
+                    tineCircleSettings.r = val;
+                    tineCircleRadiusValue.value = val;
+                });
+                tineCircleRadiusValue.addEventListener('input', e => {
+                    const val = parseFloat(e.target.value);
+                    tineCircleSettings.r = val;
+                    tineCircleRadiusSlider.value = val;
+                });
+                
+                document.getElementById('color-picker').addEventListener('input', e => inkColor = e.target.value);
+                document.getElementById('random-color').addEventListener('change', e => useRandomColor = e.target.checked);
+                document.getElementById('color-palette').addEventListener('change', e => currentPalette = e.target.value);
+                document.getElementById('clear-canvas').addEventListener('click', () => { polygons = []; lastRandomColor = null; });
+                document.getElementById('save-png').addEventListener('click', () => {
+                    const tempGraphics = p.createGraphics(p.width, p.height);
+                    tempGraphics.translate(camera.x, camera.y);
+                    tempGraphics.scale(camera.zoom);
+                    drawPolygons(tempGraphics);
+                    tempGraphics.save('marbled-ink.png');
+                    tempGraphics.remove();
+                });
+                
+                document.getElementById('save-svg').addEventListener('click', () => {
+                    if (polygons.length === 0) return;
+                    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                    polygons.forEach(poly => {
+                        poly.vertices.forEach(v => {
+                            minX = p.min(minX, v.x);
+                            minY = p.min(minY, v.y);
+                            maxX = p.max(maxX, v.x);
+                            maxY = p.max(maxY, v.y);
+                        });
+                    });
+                    const padding = 50;
+                    const w = maxX - minX + padding * 2;
+                    const h = maxY - minY + padding * 2;
+
+                    const svgGraphics = p.createGraphics(w, h, p.SVG);
+                    svgGraphics.translate(-minX + padding, -minY + padding);
+                    drawPolygons(svgGraphics);
+                    svgGraphics.save('marbled-ink.svg');
+                    svgGraphics.remove();
+                });
+
+                const paintControls = document.getElementById('paint-controls');
+                const inkSettingsPanel = document.getElementById('ink-settings-panel');
+                const tineSettingsPanel = document.getElementById('tine-settings-panel');
+                const tineCircleRadiusContainer = document.getElementById('tine-circle-radius-container');
+                const canvasContainer = document.getElementById('p5-canvas-container');
+
+                document.querySelectorAll('input[name="mode"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        currentMode = e.target.value;
+                        paintControls.classList.toggle('hidden', currentMode !== 'paint');
+                        canvasContainer.style.cursor = (currentMode === 'navigate') ? 'grab' : 'crosshair';
+                    });
+                });
+
+                document.querySelectorAll('input[name="tool"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        currentTool = e.target.value;
+                        const isTine = currentTool.startsWith('tine');
+                        inkSettingsPanel.classList.toggle('hidden', isTine);
+                        tineSettingsPanel.classList.toggle('hidden', !isTine);
+                        tineCircleRadiusContainer.classList.toggle('hidden', currentTool !== 'tine-circle');
+                        
+                        if (currentTool === 'tine-line') {
+                            tineZSlider.value = tineLineSettings.z;
+                            tineZValue.value = tineLineSettings.z;
+                            tineCSlider.value = tineLineSettings.c;
+                            tineCValue.value = tineLineSettings.c;
+                        } else if (currentTool === 'tine-circle') {
+                            tineZSlider.value = tineCircleSettings.z;
+                            tineZValue.value = tineCircleSettings.z;
+                            tineCSlider.value = tineCircleSettings.c;
+                            tineCValue.value = tineCircleSettings.c;
+                            tineCircleRadiusSlider.value = tineCircleSettings.r;
+                            tineCircleRadiusValue.value = tineCircleSettings.r;
+                        }
+                        updateTineDirectionLabel(parseFloat(tineZSlider.value));
+                    });
+                });
+                
+                setTimeout(fitCanvasToContainer, 100);
+            };
+
+            p.draw = () => {
+                p.background('#ffffff');
+                p.push();
+                p.translate(camera.x, camera.y);
+                p.scale(camera.zoom);
+                drawPolygons(p);
+                
+                const worldMouse = screenToWorld(p.mouseX, p.mouseY);
+                if (currentMode === 'paint' && currentTool === 'tine-circle' && isMouseInCanvas()) {
+                    p.noFill(); p.stroke(0, 0, 0, 100); p.strokeWeight(2 / camera.zoom);
+                    p.circle(worldMouse.x, worldMouse.y, (tineCircleSettings.r) * 2);
+                }
+                p.pop();
+
+                if (currentMode === 'paint' && currentTool === 'tine-line' && dragStart) {
+                    p.stroke(0, 0, 0, 100); p.strokeWeight(2);
+                    p.line(dragStart.screen.x, dragStart.screen.y, p.mouseX, p.mouseY);
+                }
+            };
+            
+            const marbleDisplace = (point, dropCenter, r, displacement) => {
+                const pMinusC = p5.Vector.sub(point, dropCenter);
+                const magSq = pMinusC.magSq();
+                if (magSq === 0) {
+                    const randomDir = p5.Vector.fromAngle(p.random(p.TWO_PI));
+                    randomDir.setMag(r);
+                    return p5.Vector.add(dropCenter, randomDir);
+                }
+                const displacementFactor = p.sqrt(1 + (displacement * r * r) / magSq);
+                pMinusC.mult(displacementFactor);
+                return p5.Vector.add(dropCenter, pMinusC);
+            };
+
+            const addInk = (x, y, r) => {
+                const newDropCenter = p.createVector(x, y);
+                polygons.forEach(poly => {
+                    for (let i = 0; i < poly.vertices.length; i++) {
+                        poly.vertices[i] = marbleDisplace(poly.vertices[i], newDropCenter, r, inkDisplacement);
+                    }
+                });
+                const newDropVertices = [];
+                for (let i = 0; i < dropDetail; i++) {
+                    const angle = p.map(i, 0, dropDetail, 0, p.TWO_PI);
+                    newDropVertices.push(p.createVector(x + p.cos(angle) * r, y + p.sin(angle) * r));
+                }
+                
+                let finalColor;
+                if (useRandomColor) {
+                    let newColor;
+                    do {
+                        if (currentPalette === 'random') {
+                            newColor = p.color(p.random(255), p.random(255), p.random(255));
+                        } else {
+                            newColor = p.color(p.random(colorPalettes[currentPalette]));
+                        }
+                    } while (lastRandomColor && newColor.toString() === lastRandomColor.toString());
+                    finalColor = newColor;
+                    lastRandomColor = finalColor;
+                } else {
+                    finalColor = p.color(inkColor);
+                }
+                polygons.push(new MarblePolygon(newDropVertices, finalColor));
+            };
+            
+            const tineLineDisplace = (point, start, end, z, c) => {
+                const M = p5.Vector.sub(end, start);
+                if (M.magSq() === 0) return point.copy();
+                M.normalize();
+                const pMinusB = p5.Vector.sub(point, start);
+                const n = p.createVector(-M.y, M.x);
+                const dist = p.abs(pMinusB.dot(n));
+                if (dist === 0) return point.copy();
+                const invertedC = 51 - c;
+                const u = p.pow(0.5, 1 / invertedC);
+                const magnitude = z * p.pow(u, dist);
+                return p5.Vector.add(point, p5.Vector.mult(M, magnitude));
+            };
+
+            const applyTineLine = (start, end, z, c) => {
+                if (p5.Vector.dist(start, end) < 1) return;
+                polygons.forEach(poly => poly.vertices = poly.vertices.map(v => tineLineDisplace(v, start, end, z, c)));
+            };
+
+            const tineCircleDisplace = (point, center, r, z, c) => {
+                const pMinusC = p5.Vector.sub(point, center);
+                const p_r = pMinusC.mag();
+                if (p_r === 0) return point.copy();
+                const d = p.abs(p_r - r);
+                if (d === 0) return point.copy();
+                const invertedC = 51 - c;
+                const u = p.pow(0.5, 1 / invertedC);
+                const l = z * p.pow(u, d); // arc length
+                const angle = l / p_r;
+                pMinusC.rotate(angle);
+                return p5.Vector.add(center, pMinusC);
+            };
+
+            const applyTineCircle = (center, r, z, c) => {
+                 polygons.forEach(poly => poly.vertices = poly.vertices.map(v => tineCircleDisplace(v, center, r, z, c)));
+            };
+
+            const isMouseInCanvas = () => p.mouseX > 0 && p.mouseX < p.width && p.mouseY > 0 && p.mouseY < p.height;
+
+            p.mouseClicked = () => {
+                if (!isMouseInCanvas() || p.mouseButton !== p.LEFT || currentMode !== 'paint') return;
+                const worldMouse = screenToWorld(p.mouseX, p.mouseY);
+                if (currentTool === 'ink') addInk(worldMouse.x, worldMouse.y, dropRadius);
+                else if (currentTool === 'tine-circle') applyTineCircle(worldMouse, tineCircleSettings.r, tineCircleSettings.z, tineCircleSettings.c);
+            };
+            
+            p.mousePressed = () => {
+                if (!isMouseInCanvas()) return;
+                if (p.mouseButton === p.LEFT) {
+                    if (currentMode === 'paint' && currentTool === 'tine-line') {
+                        dragStart = {
+                            world: screenToWorld(p.mouseX, p.mouseY),
+                            screen: p.createVector(p.mouseX, p.mouseY)
+                        };
+                    } else if (currentMode === 'navigate') {
+                        panStart = p.createVector(p.mouseX, p.mouseY);
+                        document.getElementById('p5-canvas-container').style.cursor = 'grabbing';
+                    }
+                }
+            };
+            
+            p.mouseDragged = () => {
+                if (panStart) {
+                    camera.x += p.mouseX - p.pmouseX;
+                    camera.y += p.mouseY - p.pmouseY;
+                }
+            };
+
+            p.mouseReleased = () => {
+                if (currentMode === 'paint' && currentTool === 'tine-line' && dragStart) {
+                    const worldMouse = screenToWorld(p.mouseX, p.mouseY);
+                    applyTineLine(dragStart.world, worldMouse, tineLineSettings.z, tineLineSettings.c);
+                    dragStart = null;
+                }
+                if (panStart) {
+                    panStart = null;
+                    if (currentMode === 'navigate') {
+                        document.getElementById('p5-canvas-container').style.cursor = 'grab';
+                    }
+                }
+            };
+
+            p.mouseWheel = (event) => {
+                if (!isMouseInCanvas() || currentMode !== 'navigate') return;
+                const zoomFactor = 1.1;
+                const mouseWorldBefore = screenToWorld(p.mouseX, p.mouseY);
+                if (event.delta < 0) {
+                    camera.zoom *= zoomFactor;
+                } else {
+                    camera.zoom /= zoomFactor;
+                }
+                const mouseWorldAfter = screenToWorld(p.mouseX, p.mouseY);
+                camera.x += (mouseWorldAfter.x - mouseWorldBefore.x) * camera.zoom;
+                camera.y += (mouseWorldAfter.y - mouseWorldBefore.y) * camera.zoom;
+                return false; // prevent page scrolling
+            };
+            
+            p.windowResized = () => {
+                fitCanvasToContainer();
+            };
+        };
+        new p5(sketch);
+    </script>
+</body>
+</html>
