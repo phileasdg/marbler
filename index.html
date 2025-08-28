@@ -3,7 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marbler</title>
+    
+    <!-- SEO Meta Tags -->
+    <title>Marbler - Interactive Digital Marbling Art Generator</title>
+    <meta name="description" content="Create unique, fluid art with Marbler, an interactive digital marbling tool. Drop and comb digital ink to generate beautiful, high-resolution abstract images.">
+    <meta name="keywords" content="digital art, marbling, generative art, abstract art, p5.js, creative tool, interactive art, fluid dynamics, art generator">
+    <link rel="canonical" href="https://your-website-url.com/"> <!-- Replace with your actual URL -->
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎨</text></svg>">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-website-url.com/"> <!-- Replace with your actual URL -->
+    <meta property="og:title" content="Marbler - Interactive Digital Marbling Art Generator">
+    <meta property="og:description" content="Create unique, fluid art with Marbler, an interactive digital marbling tool.">
+    <meta property="og:image" content="https://placehold.co/1200x630/4f46e5/ffffff?text=Marbler"> <!-- Replace with a preview image URL -->
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-website-url.com/"> <!-- Replace with your actual URL -->
+    <meta property="twitter:title" content="Marbler - Interactive Digital Marbling Art Generator">
+    <meta property="twitter:description" content="Create unique, fluid art with Marbler, an interactive digital marbling tool.">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/4f46e5/ffffff?text=Marbler"> <!-- Replace with a preview image URL -->
+
     <!-- Tailwind CSS for styling the UI -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- p5.js library for graphics and interaction -->
@@ -95,6 +118,23 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Marbler",
+      "description": "An interactive digital marbling tool to create unique, fluid art by dropping and combing digital ink.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All",
+      "author": {
+        "@type": "Person",
+        "name": "Phileas Dazeley-Gaist"
+      },
+      "url": "https://your-website-url.com/" 
+    }
+    </script>
 </head>
 <body class="text-gray-800 flex flex-col md:flex-row h-screen overflow-hidden">
 
@@ -123,7 +163,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                     </button>
                     <button id="menu-close-button" class="md:hidden btn p-2 rounded-full hover:bg-gray-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                     </button>
                 </div>
             </div>
