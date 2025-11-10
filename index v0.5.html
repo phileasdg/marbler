@@ -122,13 +122,6 @@
             flex-grow: 1;
             height: 1rem;
             border-radius: 4px;
-            transition: transform 0.1s ease-in-out;
-        }
-        /* Animation for deletable swatches */
-        .color-swatch.deletable:hover {
-            transform: scale(1.1);
-            cursor: no-drop; /* Indieates removal */
-            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5); /* Red glow on hover */
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -258,37 +251,20 @@
                             </label>
                             <input type="range" id="ink-trail-spacing" min="5" max="100" value="25" step="1">
                         </div>
-                        <!-- UPDATE: Restructured Color Section -->
                         <div class="space-y-2">
                              <label class="text-xs font-medium">Color</label>
-                            <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-3">
+                                <input type="color" id="color-picker" value="#4f46e5" class="w-9 h-9 p-0 border-none bg-transparent rounded-md cursor-pointer appearance-none">
                                 <div class="flex-grow">
-                                    <div class="flex items-center justify-between mb-2">
-                                        <label class="flex items-center gap-2 text-sm" title="Use a random color from the selected palette below">
-                                            <input type="checkbox" id="random-color" class="accent-indigo-600 w-4 h-4 rounded" checked>
-                                            <span>Randomize</span>
-                                        </label>
-                                        <div class="flex items-center gap-2">
-                                            <label class="text-xs font-medium text-gray-500">Manual:</label>
-                                            <input type="color" id="custom-color-input" value="#4f46e5" class="w-8 h-8 p-0 border-none bg-transparent rounded-md cursor-pointer" title="Manual color (used if 'Randomize' is off) and color to add to custom palette">
-                                        </div>
-                                    </div>
-
-                                    <label class="text-xs font-medium text-gray-600">Palette</label>
-                                    <select id="color-palette" class="w-full text-xs p-2 rounded-md border border-gray-300 bg-white mt-1"></select>
-                                    
-                                    <!-- Custom Palette Controls -->
-                                    <div id="custom-palette-controls" class="hidden mt-2 p-2 bg-gray-50 rounded-md border border-gray-200">
-                                        <button id="add-custom-color" class="btn text-xs py-1 px-3 bg-white hover:bg-indigo-50 w-full rounded-md">Add Manual Color to Palette</button>
-                                        <p class="text-[10px] text-gray-500 mt-1 text-center">Click a swatch below to remove it.</p>
-                                    </div>
-
-                                    <div id="color-palette-preview" class="flex items-center mt-2 h-6 overflow-hidden w-full space-x-1 rounded-md border border-gray-100 p-1 bg-white"></div>
+                                    <label class="flex items-center gap-2 text-sm">
+                                        <input type="checkbox" id="random-color" class="accent-indigo-600 w-4 h-4 rounded" checked>
+                                        <span>Random</span>
+                                    </label>
+                                    <select id="color-palette" class="w-full text-xs p-1 rounded-md mt-1 bg-white"></select>
+                                    <div id="color-palette-preview" class="flex items-center mt-2 h-4 overflow-hidden w-full space-x-1"></div>
                                 </div>
-                                <!-- Vestigial 'color-picker' div removed -->
                             </div>
                         </div>
-                        <!-- End of Color Section -->
                     </div>
                 </div>
 
@@ -417,10 +393,11 @@
             let dropGrowthRate = 50, dropDetail = 2000, inkDisplacement = 1, inkTrailSpacing = 25;
             let tineLineSettings = { zRate: 80, c: 40, direction: 1 };
             let tineCircleSettings = { zRate: 80, c: 40, r: 80, direction: 1 };
-            let inkColor = '#4f46e5'; // This will be the manual color
+            let inkColor = '#4f46e5';
             let useRandomColor = true;
             let dragStart = null;
             let lastRandomColor = null;
+            let activeDropColor = null;
             let pressStartTime = 0;
             let trailPoints = [];
 
@@ -428,9 +405,7 @@
                 ocean: ['#03045e', '#023e8a', '#0077b6', '#0096c7', '#00b4d8', '#48cae4', '#90e0ef', '#ade8f4', '#caf0f8', '#7400b8', '#6930c3', '#5e60ce', '#5390d9', '#4ea8de'],
                 sunset: ['#4c1d95', '#7c3aed', '#c084fc', '#f87171', '#fb923c', '#fbbf24', '#fde047', '#ff006e', '#ff6d00', '#ff8500', '#ff9100', '#ffc300'],
                 forest: ['#081c15', '#1b4332', '#2d6a4f', '#40916c', '#52b788', '#74c69d', '#95d5b2', '#283618', '#606c38', '#dda15e', '#bc6c25', '#fefae0'],
-                vibrant: ['#ff6b6b', '#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590', '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c'],
-                coffee: ['#3c2f2f', '#4b3832', '#6f4e37', '#8d6e63', '#a68b6c', '#c4a484', '#e6c9a8', '#fff4e6'],
-                custom: ['#6f4e37', '#e6c9a8'] // Default starter colors for custom
+                vibrant: ['#ff6b6b', '#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590', '#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#073b4c']
             };
             let currentPalette = 'ocean';
 
@@ -565,42 +540,24 @@
                 document.querySelectorAll('input[name="tine-line-direction"]').forEach(radio => radio.addEventListener('change', e => tineLineSettings.direction = parseInt(e.target.value, 10)));
                 document.querySelectorAll('input[name="tine-circle-direction"]').forEach(radio => radio.addEventListener('change', e => tineCircleSettings.direction = parseInt(e.target.value, 10)));
 
-                // UPDATE: Removed 'color-picker' listener, added 'custom-color-input' listener
-                document.getElementById('custom-color-input').addEventListener('input', e => inkColor = e.target.value);
+                document.getElementById('color-picker').addEventListener('input', e => inkColor = e.target.value);
                 document.getElementById('random-color').addEventListener('change', e => useRandomColor = e.target.checked);
                 
-                // --- PALETTE LOGIC START ---
                 const paletteSelect = document.getElementById('color-palette');
                 const palettePreview = document.getElementById('color-palette-preview');
-                const customPaletteControls = document.getElementById('custom-palette-controls');
-                const customColorInput = document.getElementById('custom-color-input');
-                const addCustomColorBtn = document.getElementById('add-custom-color');
-
                 const updateColorPalettePreview = () => {
                     const selected = paletteSelect.value;
                     palettePreview.innerHTML = '';
-                    
                     if (selected === 'random') {
                         const gradient = document.createElement('div');
-                        gradient.className = 'w-full h-full rounded-sm';
+                        gradient.className = 'w-full h-4 rounded-full';
                         gradient.style.background = 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)';
                         palettePreview.appendChild(gradient);
                     } else {
-                        // Render swatches
-                        colorPalettes[selected].forEach((color, index) => {
+                        colorPalettes[selected].forEach(color => {
                             const swatch = document.createElement('div');
                             swatch.className = 'color-swatch';
                             swatch.style.backgroundColor = color;
-                            
-                            // If custom, make swatches deletable
-                            if (selected === 'custom') {
-                                swatch.classList.add('deletable');
-                                swatch.title = "Click to remove";
-                                swatch.addEventListener('click', () => {
-                                    colorPalettes.custom.splice(index, 1);
-                                    updateColorPalettePreview();
-                                });
-                            }
                             palettePreview.appendChild(swatch);
                         });
                     }
@@ -608,33 +565,11 @@
                 
                 paletteSelect.addEventListener('change', e => {
                     currentPalette = e.target.value;
-                    // Show/hide custom controls based on selection
-                    if (currentPalette === 'custom') {
-                        customPaletteControls.classList.remove('hidden');
-                    } else {
-                        customPaletteControls.classList.add('hidden');
-                    }
-                    updateColorPalettePreview();
-                });
-
-                // Add Custom Color Listener
-                addCustomColorBtn.addEventListener('click', () => {
-                    // Use the value from the (now always visible) manual color input
-                    colorPalettes.custom.push(customColorInput.value);
                     updateColorPalettePreview();
                 });
                 
                 // Populate select and initial preview
-                const paletteNames = { 
-                    ocean: "Ocean Blues", 
-                    sunset: "Sunset Hues", 
-                    forest: "Forest Greens", 
-                    vibrant: "Vibrant", 
-                    coffee: "Coffee Tones",
-                    custom: "Custom Palette",
-                    random: "Purely Random" 
-                };
-
+                const paletteNames = { ocean: "Ocean Blues", sunset: "Sunset Hues", forest: "Forest Greens", vibrant: "Vibrant", random: "Purely Random" };
                 Object.keys(paletteNames).forEach(key => {
                     const option = document.createElement('option');
                     option.value = key;
@@ -642,7 +577,7 @@
                     paletteSelect.appendChild(option);
                 });
                 updateColorPalettePreview();
-                // --- PALETTE LOGIC END ---
+
 
                 document.getElementById('clear-canvas').addEventListener('click', () => { polygons = []; lastRandomColor = null; });
                 document.getElementById('save-png').addEventListener('click', () => {
@@ -650,14 +585,8 @@
                     tempGraphics.translate(camera.x, camera.y);
                     tempGraphics.scale(camera.zoom);
                     drawScene(tempGraphics, polygons);
-                    
-                    // Get the p5.Image from the buffer
-                    const img = tempGraphics.get();
-                    
-                    // Call .save() directly on the p5.Image object, not p.save()
-                    img.save('marbled-ink.png', 'png'); 
-                    
-                    tempGraphics.remove(); // Clean up the buffer
+                    tempGraphics.save('marbled-ink.png');
+                    tempGraphics.remove();
                 });
                 
                 const paintControls = document.getElementById('paint-controls');
@@ -883,29 +812,18 @@
 
             const isMouseInCanvas = () => p.mouseX > 0 && p.mouseX < p.width && p.mouseY > 0 && p.mouseY < p.height;
             
-            // UPDATE: This logic now correctly uses 'inkColor' as the fallback
-            // 'inkColor' is set by the 'custom-color-input'
             const getNextColor = () => {
                 if (useRandomColor) {
                     let newColor;
-                    // If custom palette is empty, or 'random' is selected
-                    if (currentPalette === 'custom' && colorPalettes.custom.length === 0) {
-                         return p.color(inkColor); // Fallback to manual color
-                    }
-
                     do {
                         if (currentPalette === 'random') {
                             newColor = p.color(p.random(255), p.random(255), p.random(255));
                         } else {
-                            // This now works for 'custom' as well
                             newColor = p.color(p.random(colorPalettes[currentPalette]));
                         }
-                    // Prevent infinite loop if palette only has 1 color
-                    } while (colorPalettes[currentPalette] && colorPalettes[currentPalette].length > 1 && lastRandomColor && newColor.toString() === lastRandomColor.toString());
-                    
+                    } while (lastRandomColor && newColor.toString() === lastRandomColor.toString());
                     return newColor;
                 } else {
-                    // Use the manual color set by 'custom-color-input'
                     return p.color(inkColor);
                 }
             };
@@ -956,7 +874,7 @@
             p.mouseReleased = () => {
                 if (isModalOpen) return;
                 if (isActionInProgress) {
-                    if (currentTool === 'ink' && trailPoints.length > 0) {
+                    if (currentTool === 'ink') {
                         lastRandomColor = trailPoints[trailPoints.length - 1].color;
                     }
                     polygons = previewPolygons;
